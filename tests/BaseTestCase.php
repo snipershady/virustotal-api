@@ -56,6 +56,77 @@ class BaseTestCase extends AbstractTestCase {
         parent::setUp();
     }
 
+    public function testUploadFileAndAnalyze(): void {
+        echo PHP_EOL . "Testing: " . __FUNCTION__ . PHP_EOL;
+        $apiKey = $this->getApiKey();
+        $this->createVirusTotalFile();
+        $vts = new VirustotalService($apiKey);
+        $ufdto = $vts->uploadFile("/tmp/vt.txt");
+
+        self::assertNotEmpty($ufdto->getId());
+        self::assertEquals($ufdto->getType(), "analysis");
+        self::assertEquals("https://www.virustotal.com/api/v3/analyses/" . $ufdto->getId(), $ufdto->getSelfLink());
+        $faDto = $vts->analyze($ufdto);
+
+        self::assertNotEmpty($faDto->getDate());
+    }
+
+    public function testOnefunctionWrapperUploadAndAnalyze(): void {
+        echo PHP_EOL . "Testing: " . __FUNCTION__ . PHP_EOL;
+        $apiKey = $this->getApiKey();
+        $this->createVirusTotalFile();
+        $vts = new VirustotalService($apiKey);
+        $faDto = $vts->uploadFileAndAnalyze("/tmp/vt.txt");
+        if ($faDto->getMalicious() === 0 && $faDto->getSuspicious() === 0) {
+            echo PHP_EOL . "No virus detected" . PHP_EOL;
+        }
+
+        self::assertNotEmpty($faDto->getId());
+        self::assertEquals($faDto->getType(), "analysis");
+        self::assertEquals("https://www.virustotal.com/api/v3/analyses/" . $faDto->getId(), $faDto->getSelfLink());
+
+        self::assertNotEmpty($faDto->getDate());
+    }
+
+    public function testScanUrlAndAnalyze(): void {
+        echo PHP_EOL . "Testing: " . __FUNCTION__ . PHP_EOL;
+        $url = "https://pwgen3.spinfo.it/logo.png";
+        $apiKey = $this->getApiKey();
+
+        $vts = new VirustotalService($apiKey);
+        $ufdto = $vts->scanUrl($url);
+
+        $faDto = $vts->analyze($ufdto);
+        if ($faDto->getMalicious() === 0 && $faDto->getSuspicious() === 0) {
+            echo PHP_EOL . "No virus detected" . PHP_EOL;
+        }
+
+        self::assertNotEmpty($faDto->getId());
+        self::assertEquals($faDto->getType(), "analysis");
+        self::assertEquals("https://www.virustotal.com/api/v3/analyses/" . $faDto->getId(), $faDto->getSelfLink());
+
+        self::assertNotEmpty($faDto->getDate());
+    }
+
+    public function testOnefunctionWrapperScanUrlAndAnalyze(): void {
+        echo PHP_EOL . "Testing: " . __FUNCTION__ . PHP_EOL;
+        $url = "https://pwgen3.spinfo.it/logo.png";
+        $apiKey = $this->getApiKey();
+
+        $vts = new VirustotalService($apiKey);
+        $faDto = $vts->scanUrlAndAnalyze($url);
+
+        if ($faDto->getMalicious() === 0 && $faDto->getSuspicious() === 0) {
+            echo PHP_EOL . "No virus detected" . PHP_EOL;
+        }
+
+        self::assertNotEmpty($faDto->getId());
+        self::assertEquals($faDto->getType(), "analysis");
+        self::assertEquals("https://www.virustotal.com/api/v3/analyses/" . $faDto->getId(), $faDto->getSelfLink());
+
+        self::assertNotEmpty($faDto->getDate());
+    }
+
     /**
      * 
      * @return void
@@ -90,37 +161,5 @@ class BaseTestCase extends AbstractTestCase {
         }
 
         return (string) $envVariables['API_KEY'];
-    }
-
-    public function testUploadFileAndAnalyze(): void {
-        echo PHP_EOL . "Testing: " . __FUNCTION__ . PHP_EOL;
-        $apiKey = $this->getApiKey();
-        $this->createVirusTotalFile();
-        $vts = new VirustotalService($apiKey);
-        $ufdto = $vts->uploadFile("/tmp/vt.txt");
-
-        self::assertNotEmpty($ufdto->getId());
-        self::assertEquals($ufdto->getType(), "analysis");
-        self::assertEquals("https://www.virustotal.com/api/v3/analyses/" . $ufdto->getId(), $ufdto->getSelfLink());
-        $faDto = $vts->analyze($ufdto);
-
-        self::assertNotEmpty($faDto->getDate());
-    }
-
-    public function testOnefunctionWrapperUploadAndAnalyze(): void {
-        echo PHP_EOL . "Testing: " . __FUNCTION__ . PHP_EOL;
-        $apiKey = $this->getApiKey();
-        $this->createVirusTotalFile();
-        $vts = new VirustotalService($apiKey);
-        $faDto = $vts->uploadFileAndAnalyze("/tmp/vt.txt");
-        if ($faDto->getMalicious() === 0 && $faDto->getSuspicious() === 0) {
-            echo PHP_EOL . "No virus detected" . PHP_EOL;
-        }
-
-        self::assertNotEmpty($faDto->getId());
-        self::assertEquals($faDto->getType(), "analysis");
-        self::assertEquals("https://www.virustotal.com/api/v3/analyses/" . $faDto->getId(), $faDto->getSelfLink());
-
-        self::assertNotEmpty($faDto->getDate());
     }
 }

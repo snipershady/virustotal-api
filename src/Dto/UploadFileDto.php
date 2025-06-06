@@ -14,6 +14,11 @@ class UploadFileDto {
         
     }
 
+    /**
+     * 
+     * @param array $data
+     * @return self
+     */
     public static function fromArray(array $data): self {
         return new self(
                 type: $data['data']['type'] ?? '',
@@ -22,6 +27,10 @@ class UploadFileDto {
         );
     }
 
+    /**
+     * 
+     * @return array
+     */
     public function toArray(): array {
         return [
             'type' => $this->type,

@@ -7,29 +7,34 @@ namespace Virustotal\Dto;
 class FileAnalysisDto {
 
     public function __construct(
-            public string $id,
-            public string $type,
-            public string $selfLink,
-            public string $itemLink,
-            public string $status,
-            public int $date,
-            public int $malicious,
-            public int $suspicious,
-            public int $undetected,
-            public int $harmless,
-            public int $timeout,
-            public int $confirmedTimeout,
-            public int $failure,
-            public int $typeUnsupported,
-            public ?array $results,
-            public string $sha256,
-            public string $md5,
-            public string $sha1,
-            public int $size
+            private readonly string $id,
+            private readonly string $type,
+            private readonly string $selfLink,
+            private readonly string $itemLink,
+            private readonly string $status,
+            private readonly int $date,
+            private readonly int $malicious,
+            private readonly int $suspicious,
+            private readonly int $undetected,
+            private readonly int $harmless,
+            private readonly int $timeout,
+            private readonly int $confirmedTimeout,
+            private readonly int $failure,
+            private readonly int $typeUnsupported,
+            private readonly ?array $results,
+            private readonly string $sha256,
+            private readonly string $md5,
+            private readonly string $sha1,
+            private readonly int $size
     ) {
         
     }
 
+    /**
+     * 
+     * @param array $data
+     * @return self
+     */
     public static function fromArray(array $data): self {
         $stats = $data['data']['attributes']['stats'] ?? [];
 

@@ -31,9 +31,55 @@ class VirustotalService {
      * 
      * @param string $filePath
      * @return FileAnalysisDto
+     * @throws JsonException
+     * @throws RestCallException
+     * @throws RuntimeException
      */
     public function uploadFileAndAnalyze(string $filePath): FileAnalysisDto {
         return $this->analyze($this->uploadFile($filePath));
+    }
+
+    /**
+     * 
+     * @param string $url
+     * @return FileAnalysisDto
+     * @throws JsonException
+     * @throws RestCallException
+     * @throws RuntimeException
+     */
+    public function scanUrlAndAnalyze(string $url): FileAnalysisDto {
+        return $this->analyze($this->scanUrl($url));
+    }
+
+    /**
+     * 
+     * @param string $url
+     * @return UploadFileDto
+     * @throws JsonException
+     * @throws RestCallException
+     * @throws RuntimeException
+     */
+    public function scanUrl(string $url): UploadFileDto {
+        $postFields = http_build_query(['url' => $url]);
+
+        $curl = curl_init();
+        if ($curl === false) {
+            throw new RuntimeException("cURL init Error");
+        }
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $this->basePath . '/urls',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => [
+                'accept: application/json',
+                'content-type: application/x-www-form-urlencoded',
+                'x-apikey: ' . $this->apiKey
+            ],
+            CURLOPT_POSTFIELDS => $postFields
+        ]);
+
+        return UploadFileDto::fromArray($this->getResponse($curl));
     }
 
     /**
@@ -75,6 +121,9 @@ class VirustotalService {
      */
     public function analyze(UploadFileDto $uploadFileDto): FileAnalysisDto {
         $curl = curl_init();
+        if ($curl === false) {
+            throw new RuntimeException("cURL init Error");
+        }
 
         curl_setopt_array($curl, [
             CURLOPT_URL => $this->basePath . '/analyses/' . $uploadFileDto->getId(),
@@ -90,21 +139,25 @@ class VirustotalService {
     /**
      * 
      * @param CurlHandle $curl
-     * @return array
+     * @return array<string, null|string|int>
      * @throws RestCallException
      */
     private function getResponse(CurlHandle $curl): array {
         $response = curl_exec($curl);
         $httpStatusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-        if ($response === false) {
+        if ($httpStatusCode === 401) {
+            throw new RestCallException("Rest call error. Invalid Credential: " . $response, $httpStatusCode);
+        }
+        
+        if ($httpStatusCode > 299 || $response === false) {
             $errorMsg = curl_error($curl);
             curl_close($curl);
             throw new RestCallException("Rest call error: " . $errorMsg, $httpStatusCode);
         }
 
         curl_close($curl);
-        $arrayResponse = json_decode($response, true, 512, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+        $arrayResponse = json_decode((string) $response, true, 512, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
         return $arrayResponse;
     }
 }
