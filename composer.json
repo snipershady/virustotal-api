@@ -1,0 +1,35 @@
+{
+    "name": "snipershady/virustotal-api",
+    "description": "A simple wrapper for virustotal.com service, without any external dependencies, pure PHP.",
+    "keywords": ["virustotal", "virustotal.com", "api", "v3"],
+    "homepage": "https://www.spinfo.it",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Stefano Perrini",
+            "email": "perrini.stefano@gmail.com",
+            "homepage": "https://www.spinfo.it"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "RateLimiter\\": "src/"
+        }       
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "RateLimiter\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": ">=8.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.2",
+        "phpstan/phpstan": "^2.1",
+        "rector/rector": "^2.0"
+    }
+}
