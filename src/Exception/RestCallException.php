@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Virustotal\Exception;
 
+use Exception;
+use Throwable;
+
 class RestCallException extends Exception {
 
     /**

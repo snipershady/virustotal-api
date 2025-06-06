@@ -6,6 +6,13 @@ namespace Virustotal\Service;
 
 use CURLFile;
 use Virustotal\Exception\RestCallException;
+use function curl_close;
+use function curl_error;
+use function curl_exec;
+use function curl_getinfo;
+use function curl_init;
+use function curl_setopt_array;
+use function json_decode;
 
 class VirustotalService {
 
