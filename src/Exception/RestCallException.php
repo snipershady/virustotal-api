@@ -17,6 +17,10 @@ class RestCallException extends Exception {
         parent::__construct($message, $code, $previous);
     }
 
+    /**
+     * 
+     * @return int
+     */
     public function getHttpStatusCode(): int {
         return $this->httpStatusCode;
     }

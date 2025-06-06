@@ -20,7 +20,7 @@ class VirustotalService {
      * 
      * @param string $filePath
      * @return array<string, string>
-     * @throws JsonException|Exception
+     * @throws JsonException|RestCallException
      */
     public function uploadFile(string $filePath): array {
         $apiKey = "123";
