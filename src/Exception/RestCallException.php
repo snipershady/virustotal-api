@@ -16,7 +16,7 @@ class RestCallException extends Exception {
      * @param int $code
      * @param Throwable $previous
      */
-    public function __construct(string $message, private readonly int $httpStatusCode = 0, int $code = 0, ?Throwable $previous = null) {
+    public function __construct(string $message, private readonly int $httpStatusCode, int $code = 0, ?Throwable $previous = null) {
         parent::__construct($message, $code, $previous);
     }
 

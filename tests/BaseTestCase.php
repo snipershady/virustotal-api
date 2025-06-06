@@ -66,12 +66,16 @@ class BaseTestCase extends AbstractTestCase {
 
         try {
             file_put_contents($filePath, $content, LOCK_EX);
-            echo "File creato con successo: {$filePath}" . PHP_EOL;
-        } catch (Throwable $e) {
-            echo "Errore nella creazione del file: " . $e->getMessage() . PHP_EOL;
+        } catch (Throwable $throwable) {
+            echo "Errore nella creazione del file: " . $throwable->getMessage() . PHP_EOL;
         }
     }
 
+    /**
+     * 
+     * @return string
+     * @throws Exception
+     */
     private function getApiKey(): string {
         $envFilePath = __DIR__ . '/../.env';
 
@@ -88,16 +92,32 @@ class BaseTestCase extends AbstractTestCase {
         return (string) $envVariables['API_KEY'];
     }
 
-    public function testUploadFile(): void {
-        echo "Testing: " . __FUNCTION__;
+    public function testUploadFileAndAnalyze(): void {
+        echo PHP_EOL."Testing: " . __FUNCTION__ . PHP_EOL;
         $apiKey = $this->getApiKey();
         $this->createVirusTotalFile();
         $vts = new VirustotalService($apiKey);
-        $response = $vts->uploadFile("/tmp/vt.txt");
-        $ufdto = UploadFileDto::fromArray($response);
+        $ufdto = $vts->uploadFile("/tmp/vt.txt");
+
         self::assertNotEmpty($ufdto->getId());
         self::assertEquals($ufdto->getType(), "analysis");
         self::assertEquals("https://www.virustotal.com/api/v3/analyses/" . $ufdto->getId(), $ufdto->getSelfLink());
-        self::assertTrue(true);
+        $faDto = $vts->analyze($ufdto);
+
+        self::assertNotEmpty($faDto->getDate());
+    }
+
+    public function testOnefunctionWrapperUploadAndAnalyze(): void {
+        echo PHP_EOL."Testing: " . __FUNCTION__ . PHP_EOL;
+        $apiKey = $this->getApiKey();
+        $this->createVirusTotalFile();
+        $vts = new VirustotalService($apiKey);
+        $faDto = $vts->uploadFileAndAnalyze("/tmp/vt.txt");
+
+        self::assertNotEmpty($faDto->getId());
+        self::assertEquals($faDto->getType(), "analysis");
+        self::assertEquals("https://www.virustotal.com/api/v3/analyses/" . $faDto->getId(), $faDto->getSelfLink());
+
+        self::assertNotEmpty($faDto->getDate());
     }
 }

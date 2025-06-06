@@ -6,7 +6,10 @@ namespace Virustotal\Service;
 
 use CURLFile;
 use CurlHandle;
+use JsonException;
 use RuntimeException;
+use Virustotal\Dto\FileAnalysisDto;
+use Virustotal\Dto\UploadFileDto;
 use Virustotal\Exception\RestCallException;
 use function curl_close;
 use function curl_error;
@@ -27,10 +30,21 @@ class VirustotalService {
     /**
      * 
      * @param string $filePath
-     * @return array<string, string>
-     * @throws JsonException|RestCallException|RuntimeException
+     * @return FileAnalysisDto
      */
-    public function uploadFile(string $filePath): array {
+    public function uploadFileAndAnalyze(string $filePath): FileAnalysisDto {
+        return $this->analyze($this->uploadFile($filePath));
+    }
+
+    /**
+     * 
+     * @param string $filePath
+     * @return UploadFileDto
+     * @throws JsonException
+     * @throws RestCallException
+     * @throws RuntimeException
+     */
+    public function uploadFile(string $filePath): UploadFileDto {
 
         $curl = curl_init();
         if ($curl === false) {
@@ -51,9 +65,34 @@ class VirustotalService {
             ]
         ]);
 
-        return $this->getResponse($curl);
+        return UploadFileDto::fromArray($this->getResponse($curl));
     }
 
+    /**
+     * 
+     * @param UploadFileDto $uploadFileDto
+     * @return FileAnalysisDto
+     */
+    public function analyze(UploadFileDto $uploadFileDto): FileAnalysisDto {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $this->basePath . '/analyses/' . $uploadFileDto->getId(),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'accept: application/json',
+                'x-apikey: ' . $this->apiKey
+            ],
+        ]);
+        return FileAnalysisDto::fromArray($this->getResponse($curl));
+    }
+
+    /**
+     * 
+     * @param CurlHandle $curl
+     * @return array
+     * @throws RestCallException
+     */
     private function getResponse(CurlHandle $curl): array {
         $response = curl_exec($curl);
         $httpStatusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);

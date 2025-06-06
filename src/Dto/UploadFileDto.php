@@ -14,7 +14,7 @@ class UploadFileDto {
         
     }
 
-    public static function fromArray(array $data): static {
+    public static function fromArray(array $data): self {
         return new self(
                 type: $data['data']['type'] ?? '',
                 id: $data['data']['id'] ?? '',
@@ -40,20 +40,5 @@ class UploadFileDto {
 
     public function getSelfLink(): string {
         return $this->selfLink;
-    }
-
-    public function setType(string $type): static {
-        $this->type = $type;
-        return $this;
-    }
-
-    public function setId(string $id): static {
-        $this->id = $id;
-        return $this;
-    }
-
-    public function setSelfLink(string $selfLink): static {
-        $this->selfLink = $selfLink;
-        return $this;
     }
 }
