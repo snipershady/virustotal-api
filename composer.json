@@ -16,12 +16,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "RateLimiter\\": "src/"
+            "Virustotal\\": "src/"
         }       
     },
     "autoload-dev": {
         "psr-4": {
-            "RateLimiter\\Tests\\": "tests/"
+            "Virustotal\\Tests\\": "tests/"
         }
     },
     "require": {
