@@ -93,7 +93,7 @@ class BaseTestCase extends AbstractTestCase {
     }
 
     public function testUploadFileAndAnalyze(): void {
-        echo PHP_EOL."Testing: " . __FUNCTION__ . PHP_EOL;
+        echo PHP_EOL . "Testing: " . __FUNCTION__ . PHP_EOL;
         $apiKey = $this->getApiKey();
         $this->createVirusTotalFile();
         $vts = new VirustotalService($apiKey);
@@ -108,11 +108,14 @@ class BaseTestCase extends AbstractTestCase {
     }
 
     public function testOnefunctionWrapperUploadAndAnalyze(): void {
-        echo PHP_EOL."Testing: " . __FUNCTION__ . PHP_EOL;
+        echo PHP_EOL . "Testing: " . __FUNCTION__ . PHP_EOL;
         $apiKey = $this->getApiKey();
         $this->createVirusTotalFile();
         $vts = new VirustotalService($apiKey);
         $faDto = $vts->uploadFileAndAnalyze("/tmp/vt.txt");
+        if ($faDto->getMalicious() === 0 && $faDto->getSuspicious() === 0) {
+            echo PHP_EOL . "No virus detected" . PHP_EOL;
+        }
 
         self::assertNotEmpty($faDto->getId());
         self::assertEquals($faDto->getType(), "analysis");

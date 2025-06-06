@@ -13,7 +13,14 @@ class FileAnalysisDto {
             public string $itemLink,
             public string $status,
             public int $date,
-            public array $stats,
+            public int $malicious,
+            public int $suspicious,
+            public int $undetected,
+            public int $harmless,
+            public int $timeout,
+            public int $confirmedTimeout,
+            public int $failure,
+            public int $typeUnsupported,
             public ?array $results,
             public string $sha256,
             public string $md5,
@@ -24,6 +31,8 @@ class FileAnalysisDto {
     }
 
     public static function fromArray(array $data): self {
+        $stats = $data['data']['attributes']['stats'] ?? [];
+
         return new self(
                 id: $data['data']['id'] ?? '',
                 type: $data['data']['type'] ?? '',
@@ -31,7 +40,14 @@ class FileAnalysisDto {
                 itemLink: $data['data']['links']['item'] ?? '',
                 status: $data['data']['attributes']['status'] ?? '',
                 date: $data['data']['attributes']['date'] ?? 0,
-                stats: $data['data']['attributes']['stats'] ?? [],
+                malicious: $stats['malicious'] ?? 0,
+                suspicious: $stats['suspicious'] ?? 0,
+                undetected: $stats['undetected'] ?? 0,
+                harmless: $stats['harmless'] ?? 0,
+                timeout: $stats['timeout'] ?? 0,
+                confirmedTimeout: $stats['confirmed-timeout'] ?? 0,
+                failure: $stats['failure'] ?? 0,
+                typeUnsupported: $stats['type-unsupported'] ?? 0,
                 results: $data['data']['attributes']['results'] ?? null,
                 sha256: $data['meta']['file_info']['sha256'] ?? '',
                 md5: $data['meta']['file_info']['md5'] ?? '',
@@ -40,6 +56,10 @@ class FileAnalysisDto {
         );
     }
 
+    /**
+     * 
+     * @return array<string, array|int|string|null>
+     */
     public function toArray(): array {
         return [
             'id' => $this->id,
@@ -48,7 +68,14 @@ class FileAnalysisDto {
             'itemLink' => $this->itemLink,
             'status' => $this->status,
             'date' => $this->date,
-            'stats' => $this->stats,
+            'malicious' => $this->malicious,
+            'suspicious' => $this->suspicious,
+            'undetected' => $this->undetected,
+            'harmless' => $this->harmless,
+            'timeout' => $this->timeout,
+            'confirmedTimeout' => $this->confirmedTimeout,
+            'failure' => $this->failure,
+            'typeUnsupported' => $this->typeUnsupported,
             'results' => $this->results,
             'sha256' => $this->sha256,
             'md5' => $this->md5,
@@ -81,8 +108,36 @@ class FileAnalysisDto {
         return $this->date;
     }
 
-    public function getStats(): array {
-        return $this->stats;
+    public function getMalicious(): int {
+        return $this->malicious;
+    }
+
+    public function getSuspicious(): int {
+        return $this->suspicious;
+    }
+
+    public function getUndetected(): int {
+        return $this->undetected;
+    }
+
+    public function getHarmless(): int {
+        return $this->harmless;
+    }
+
+    public function getTimeout(): int {
+        return $this->timeout;
+    }
+
+    public function getConfirmedTimeout(): int {
+        return $this->confirmedTimeout;
+    }
+
+    public function getFailure(): int {
+        return $this->failure;
+    }
+
+    public function getTypeUnsupported(): int {
+        return $this->typeUnsupported;
     }
 
     public function getResults(): ?array {
@@ -104,6 +159,4 @@ class FileAnalysisDto {
     public function getSize(): int {
         return $this->size;
     }
-
-   
 }
