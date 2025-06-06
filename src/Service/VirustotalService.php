@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Virustotal\Service;
 
 use CURLFile;
+use CurlHandle;
+use RuntimeException;
 use Virustotal\Exception\RestCallException;
 use function curl_close;
 use function curl_error;
@@ -19,7 +21,6 @@ class VirustotalService {
     private readonly string $basePath;
 
     public function __construct(private readonly string $apiKey) {
-        $this->apiKey = $apiKey;
         $this->basePath = "https://www.virustotal.com/api/v3";
     }
 
@@ -27,13 +28,14 @@ class VirustotalService {
      * 
      * @param string $filePath
      * @return array<string, string>
-     * @throws JsonException|RestCallException
+     * @throws JsonException|RestCallException|RuntimeException
      */
     public function uploadFile(string $filePath): array {
-        $apiKey = "123";
-        $this->apiKey = $apiKey;
 
         $curl = curl_init();
+        if ($curl === false) {
+            throw new RuntimeException("cURL init Error");
+        }
 
         curl_setopt_array($curl, [
             CURLOPT_URL => $this->basePath . '/files',
@@ -42,13 +44,17 @@ class VirustotalService {
             CURLOPT_HTTPHEADER => [
                 'accept: application/json',
                 'content-type: multipart/form-data',
-                'x-apikey: ' . $apiKey
+                'x-apikey: ' . $this->apiKey
             ],
             CURLOPT_POSTFIELDS => [
                 'file' => new CURLFile($filePath)
             ]
         ]);
 
+        return $this->getResponse($curl);
+    }
+
+    private function getResponse(CurlHandle $curl): array {
         $response = curl_exec($curl);
         $httpStatusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 

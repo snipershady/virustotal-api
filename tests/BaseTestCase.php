@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace Virustotal\Tests;
 
 use ErrorException;
+use Exception;
 use Override;
+use Throwable;
+use Virustotal\Dto\UploadFileDto;
+use Virustotal\Service\VirustotalService;
 use function error_reporting;
 use function set_error_handler;
 
@@ -52,7 +56,48 @@ class BaseTestCase extends AbstractTestCase {
         parent::setUp();
     }
 
-    public function testUno(): void {
+    /**
+     * 
+     * @return void
+     */
+    private function createVirusTotalFile(): void {
+        $filePath = '/tmp/vt.txt';
+        $content = 'Snipershady Virus Total';
+
+        try {
+            file_put_contents($filePath, $content, LOCK_EX);
+            echo "File creato con successo: {$filePath}" . PHP_EOL;
+        } catch (Throwable $e) {
+            echo "Errore nella creazione del file: " . $e->getMessage() . PHP_EOL;
+        }
+    }
+
+    private function getApiKey(): string {
+        $envFilePath = __DIR__ . '/../.env';
+
+        if (!file_exists($envFilePath)) {
+            throw new Exception("File .env not found");
+        }
+
+        $envVariables = parse_ini_file($envFilePath);
+
+        if (!isset($envVariables['API_KEY'])) {
+            throw new Exception("Undefined key API_KEY .env");
+        }
+
+        return (string) $envVariables['API_KEY'];
+    }
+
+    public function testUploadFile(): void {
+        echo "Testing: " . __FUNCTION__;
+        $apiKey = $this->getApiKey();
+        $this->createVirusTotalFile();
+        $vts = new VirustotalService($apiKey);
+        $response = $vts->uploadFile("/tmp/vt.txt");
+        $ufdto = UploadFileDto::fromArray($response);
+        self::assertNotEmpty($ufdto->getId());
+        self::assertEquals($ufdto->getType(), "analysis");
+        self::assertEquals("https://www.virustotal.com/api/v3/analyses/" . $ufdto->getId(), $ufdto->getSelfLink());
         self::assertTrue(true);
     }
 }
